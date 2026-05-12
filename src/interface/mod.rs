@@ -1,6 +1,6 @@
 // This file is part of Astarte.
 //
-// Copyright 2021 - 2025 SECO Mind Srl
+// Copyright 2021-2026 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -374,9 +374,10 @@ pub enum InterfaceTypeAggregation {
 ///
 /// See [Retention](https://docs.astarte-platform.org/astarte/latest/040-interface_schema.html#astarte-mapping-schema-retention)
 /// for more information.
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
 pub enum Retention {
     /// Data is discarded.
+    #[default]
     Discard,
     /// Data is kept in a cache in memory.
     Volatile {
@@ -449,12 +450,6 @@ impl Retention {
     }
 }
 
-impl Default for Retention {
-    fn default() -> Self {
-        Self::Discard
-    }
-}
-
 impl From<Retention> for crate::schema::Retention {
     fn from(value: Retention) -> Self {
         match value {
@@ -469,9 +464,10 @@ impl From<Retention> for crate::schema::Retention {
 ///
 /// See [Database Retention Policy](https://docs.astarte-platform.org/astarte/latest/040-interface_schema.html#astarte-mapping-schema-database_retention_policy)
 /// for more information.
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
 pub enum DatabaseRetention {
     /// Data will never expire.
+    #[default]
     NoTtl,
     /// Data will live for the ttl.
     UseTtl {
@@ -519,12 +515,6 @@ impl DatabaseRetention {
                 .inspect_err(|err| warn!(%err, "ttl conversion error"))
                 .unwrap_or(i64::MAX)
         })
-    }
-}
-
-impl Default for DatabaseRetention {
-    fn default() -> Self {
-        Self::NoTtl
     }
 }
 
