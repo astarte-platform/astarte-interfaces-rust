@@ -2,7 +2,7 @@
 
 # This file is part of Astarte.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,9 +37,11 @@ localFiles=$(
 # List files unique to localFiles and not present in pkgsFiles
 toCopy=$(comm -12 <(echo "$localFiles") <(echo "$pkgsFiles"))
 
-workingDir="$(mktemp -d)/astarte-interfaces"
+workingDir="$(mktemp -d)"
 
 mkdir -p "$workingDir"
+
+cp -v Cargo.toml Cargo.lock "$workingDir"
 
 echo "$toCopy" | while read -r file; do
     parent=$(dirname "$file")
@@ -48,4 +50,4 @@ echo "$toCopy" | while read -r file; do
     cp -v "$file" "$workingDir/$file"
 done
 
-cargo check --manifest-path "$workingDir/Cargo.toml" --workspace --all-features --locked
+cargo publish --dry-run --manifest-path "$workingDir/Cargo.toml" --workspace --all-features --locked

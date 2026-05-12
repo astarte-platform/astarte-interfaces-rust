@@ -1,6 +1,6 @@
 // This file is part of Astarte.
 //
-// Copyright 2023 - 2025 SECO Mind Srl
+// Copyright 2023-2026 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 use std::{fmt::Display, slice::Iter as SliceIter, str::FromStr};
 
-use tracing::{error, trace};
+use tracing::trace;
 
 use super::path::MappingPath;
 

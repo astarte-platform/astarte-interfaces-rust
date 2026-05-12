@@ -1,6 +1,6 @@
 # This file is part of Astarte.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2024-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,5 +38,20 @@ ignore:
 
 # Make comments less noisy
 comment:
-  layout: "header, diff, files"
+  layout: "header, diff, files, components"
   require_changes: yes
+
+component_management:
+  default_rules: # default rules that will be inherited by all components
+    statuses:
+      - type: project
+        target: auto
+        threshold: 1%
+        branches:
+          - "!main"
+  individual_components:
+    - component_id: "astarte-interfaces"
+      name: device-sdk
+      paths:
+        - src/**
+        - src/*

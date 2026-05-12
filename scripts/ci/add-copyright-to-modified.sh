@@ -1,6 +1,8 @@
+#!/usr/bin/env bash
+
 # This file is part of Astarte.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,20 +18,22 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-version: 2
-updates:
-    - package-ecosystem: github-actions
-      directory: /
-      schedule:
-          interval: weekly
-    - package-ecosystem: cargo
-      directory: "/"
-      schedule:
-          interval: weekly
-      ignore:
-        - dependency-name: "*"
-          # patch and minor updates don't matter for libraries
-          # remove this ignore rule if your package has binaries
-          update-types:
-            - "version-update:semver-patch"
-            - "version-update:semver-minor"
+set -exEuo pipefail
+
+# Trap -e errors
+trap 'echo "Exit status $? at line $LINENO from: $BASH_COMMAND"' ERR
+
+if [ $# != 2 ]; then
+    echo 'to use the script pass the base and head refs'
+    echo "$1 BASE_REF HEAD_REF"
+    exit 1
+fi
+
+base=$1
+head=$2
+
+git_file_names() {
+    git diff --name-only "$base" "$head"
+}
+
+git_file_names | xargs --max-args 1 -P "$(nproc)" ./scripts/ci/copyright.sh
