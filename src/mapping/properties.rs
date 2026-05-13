@@ -1,6 +1,6 @@
 // This file is part of Astarte.
 //
-// Copyright 2025 SECO Mind Srl
+// Copyright 2025, 2026 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -100,6 +100,10 @@ where
             invalid_filed!(properties, "database_retention_ttl");
         }
 
+        if value.required.is_some() {
+            invalid_filed!(properties, "required");
+        }
+
         Ok(Self {
             endpoint,
             mapping_type: value.mapping_type,
@@ -124,6 +128,7 @@ impl<'a> From<&'a PropertiesMapping> for Mapping<Cow<'a, str>> {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: Some(value.allow_unset),
+            required: None,
             #[cfg(feature = "doc-fields")]
             description: value.description().map(Cow::Borrowed),
             #[cfg(feature = "doc-fields")]
@@ -156,6 +161,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: Some(true),
+            required: None,
             description,
             doc,
         };
@@ -186,6 +192,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: Some(true),
+            required: None,
             description,
             doc,
         };
@@ -231,6 +238,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: None,
+            required: None,
             description: None,
             doc: None,
         };
@@ -254,6 +262,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: None,
+            required: None,
             description: None,
             doc: None,
         };
@@ -277,6 +286,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: None,
+            required: None,
             description: None,
             doc: None,
         };
@@ -300,6 +310,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: None,
+            required: None,
             description: None,
             doc: None,
         };
@@ -323,6 +334,7 @@ mod tests {
             database_retention_policy: Some(DatabaseRetentionPolicy::NoTtl),
             database_retention_ttl: None,
             allow_unset: None,
+            required: None,
             description: None,
             doc: None,
         };
@@ -346,6 +358,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: Some(420),
             allow_unset: None,
+            required: None,
             description: None,
             doc: None,
         };
@@ -355,6 +368,30 @@ mod tests {
             err,
             MappingError::InvalidField {
                 field: "database_retention_ttl",
+                interface_type: InterfaceType::Properties
+            }
+        ));
+
+        let mapping = Mapping {
+            endpoint: "/property/path",
+            mapping_type: MappingType::Boolean,
+            reliability: None,
+            explicit_timestamp: None,
+            retention: None,
+            expiry: None,
+            database_retention_policy: None,
+            database_retention_ttl: None,
+            allow_unset: None,
+            required: Some(true),
+            description: None,
+            doc: None,
+        };
+
+        let err = PropertiesMapping::try_from(mapping).unwrap_err();
+        assert!(matches!(
+            err,
+            MappingError::InvalidField {
+                field: "required",
                 interface_type: InterfaceType::Properties
             }
         ));

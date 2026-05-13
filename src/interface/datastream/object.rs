@@ -1,6 +1,6 @@
 // This file is part of Astarte.
 //
-// Copyright 2025 SECO Mind Srl
+// Copyright 2025, 2026 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -224,6 +224,7 @@ impl Schema for DatastreamObject {
                 retention: Some(self.retention.into()),
                 expiry: self.retention.as_expiry_seconds(),
                 allow_unset: None,
+                required: None,
                 database_retention_policy,
                 database_retention_ttl,
                 description,
@@ -402,6 +403,7 @@ mod tests {
                     "expiry": 30,
                     "database_retention_policy": "use_ttl",
                     "database_retention_ttl": 420,
+                    "required": true,
                     "description": "The description of the\tmapping",
                     "doc": "The documentation of the\tmapping"
                 }]
@@ -412,6 +414,7 @@ mod tests {
         let exp_mapping = DatastreamObjectMapping {
             endpoint: Endpoint::try_from("/prefix/path").unwrap(),
             mapping_type: MappingType::Boolean,
+            required: true,
             #[cfg(feature = "doc-fields")]
             description: Some("The description of the\tmapping".to_string()),
             #[cfg(feature = "doc-fields")]
@@ -476,6 +479,7 @@ mod tests {
             retention: Some(object.retention.into()),
             expiry: object.retention.as_expiry_seconds(),
             allow_unset: None,
+            required: None,
             #[cfg(feature = "doc-fields")]
             description: exp_mapping.description.as_ref().map(Cow::from),
             #[cfg(feature = "doc-fields")]
