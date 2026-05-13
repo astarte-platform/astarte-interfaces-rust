@@ -1,6 +1,6 @@
 // This file is part of Astarte.
 //
-// Copyright 2025 SECO Mind Srl
+// Copyright 2025, 2026 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ pub const MIN_OBJECT_ENDPOINT_LEN: usize = 2;
 pub struct DatastreamObjectMapping {
     pub(crate) endpoint: Endpoint<String>,
     pub(crate) mapping_type: MappingType,
+    pub(crate) required: bool,
     #[cfg(feature = "doc-fields")]
     pub(crate) description: Option<String>,
     #[cfg(feature = "doc-fields")]
@@ -79,6 +80,7 @@ where
         Ok(Self {
             endpoint,
             mapping_type: value.mapping_type,
+            required: value.required.unwrap_or(false),
             #[cfg(feature = "doc-fields")]
             description: value.description.map(T::into),
             #[cfg(feature = "doc-fields")]
@@ -108,6 +110,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: None,
+            required: None,
             description,
             doc,
         };
@@ -136,6 +139,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: None,
+            required: None,
             description: None,
             doc: None,
         };

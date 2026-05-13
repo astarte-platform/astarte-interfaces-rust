@@ -1,6 +1,6 @@
 // This file is part of Astarte.
 //
-// Copyright 2023 - 2025 SECO Mind Srl
+// Copyright 2023-2026 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -232,6 +232,11 @@ where
     /// Used only with properties.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
     pub allow_unset: Option<bool>,
+    /// Marks the mapping as required.
+    ///
+    /// Used only with object datastream.
+    #[serde(default, skip_serializing_if = "is_none_or_default")]
+    pub required: Option<bool>,
     /// An optional description of the mapping.
     #[serde(default, skip_serializing_if = "is_none_or_empty")]
     pub description: Option<T>,
@@ -735,6 +740,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: None,
+            required: None,
             description: None,
             doc: None,
         };
@@ -781,6 +787,7 @@ mod tests {
             database_retention_policy: Some(DatabaseRetentionPolicy::NoTtl),
             database_retention_ttl: Some(420),
             allow_unset: None,
+            required: None,
             description: None,
             doc: None,
         };

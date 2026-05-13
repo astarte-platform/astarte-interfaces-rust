@@ -1,6 +1,6 @@
 // This file is part of Astarte.
 //
-// Copyright 2025 SECO Mind Srl
+// Copyright 2025, 2026 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -117,6 +117,10 @@ where
             invalid_filed!(datastream, "allow_unset");
         }
 
+        if value.required.is_some() {
+            invalid_filed!(datastream, "required");
+        }
+
         Ok(Self {
             endpoint,
             reliability: value.reliability.unwrap_or_default(),
@@ -163,6 +167,7 @@ impl<'a> From<&'a DatastreamIndividualMapping> for Mapping<Cow<'a, str>> {
             retention: Some(value.retention.into()),
             expiry: value.retention.as_expiry_seconds(),
             allow_unset: None,
+            required: None,
             database_retention_policy,
             database_retention_ttl,
             description,
@@ -197,6 +202,7 @@ mod tests {
             database_retention_policy: Some(schema::DatabaseRetentionPolicy::UseTtl),
             database_retention_ttl: Some(database_ttl.as_secs().try_into().unwrap()),
             allow_unset: None,
+            required: None,
             description,
             doc,
         };
@@ -237,6 +243,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: Some(true),
+            required: None,
             description: None,
             doc: None,
         };
@@ -246,6 +253,30 @@ mod tests {
             err,
             MappingError::InvalidField {
                 field: "allow_unset",
+                interface_type: crate::schema::InterfaceType::Datastream,
+            }
+        ));
+
+        let mapping = Mapping {
+            endpoint: "/individual/path",
+            mapping_type: MappingType::Boolean,
+            reliability: None,
+            explicit_timestamp: None,
+            retention: None,
+            expiry: None,
+            database_retention_policy: None,
+            database_retention_ttl: None,
+            allow_unset: None,
+            required: Some(true),
+            description: None,
+            doc: None,
+        };
+
+        let err = DatastreamIndividualMapping::try_from(mapping).unwrap_err();
+        assert!(matches!(
+            err,
+            MappingError::InvalidField {
+                field: "required",
                 interface_type: crate::schema::InterfaceType::Datastream,
             }
         ));
