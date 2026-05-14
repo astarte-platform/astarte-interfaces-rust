@@ -18,6 +18,7 @@
 
 //! Endpoint of an interface mapping.
 
+use std::hash::Hash;
 use std::{fmt::Display, slice::Iter as SliceIter, str::FromStr};
 
 use tracing::trace;
@@ -69,62 +70,17 @@ impl<T> Endpoint<T> {
             .all(|(endpoint_level, path_level)| endpoint_level == path_level)
     }
 
-    // Check if a path is the one of an object endpoint.
-    pub(crate) fn eq_object_field<'a>(&self, path: &'a str) -> bool
-    where
-        T: PartialEq<&'a str> + Eq,
-    {
-        let last = self.levels.last();
-        debug_assert!(
-            last.is_some(),
-            "an endpoint should always have at least an endpoint"
-        );
-
-        last.is_some_and(|endpoint_level| *endpoint_level == path)
-    }
-
-    // Check if a path is the one of an object endpoint.
-    pub(crate) fn is_object_path<'a>(&self, path: &MappingPath<'a>) -> bool
-    where
-        T: PartialEq<&'a str> + Eq,
-    {
-        // Must have the same size -1.
-        if self.len().saturating_sub(1) != path.len() {
-            return false;
-        }
-
-        // This will skip the last one for the endpoint for the check above
-        self.iter()
-            .zip(path.levels.iter())
-            .all(|(endpoint_level, path_level)| match endpoint_level {
-                Level::Simple(level) => level == path_level,
-                Level::Parameter(_) => true,
-            })
+    /// Returns the last level of the endpoint
+    ///
+    /// This API shouldn't be as is, since we should guarantee that the endpoint has at least one
+    /// level.
+    pub(crate) fn last(&self) -> Option<&Level<T>> {
+        self.levels.last()
     }
 
     // Returns the number of levels in an endpoint
     pub(crate) fn len(&self) -> usize {
         self.levels.len()
-    }
-
-    /// Check that two endpoints are compatible with the same object.
-    ///
-    // https://docs.astarte-platform.org/astarte/latest/030-interface.html#endpoints-and-aggregation
-    pub(crate) fn is_same_object(&self, endpoint: &Self) -> bool
-    where
-        T: PartialEq + Eq,
-    {
-        if self.len() != endpoint.len() {
-            return false;
-        }
-
-        // Iterate over the levels of the two endpoints, except the last one that is the object key.
-        self.levels
-            .iter()
-            .zip(endpoint.levels.iter())
-            .rev()
-            .skip(1)
-            .all(|(level, other_level)| level == other_level)
     }
 }
 
@@ -204,7 +160,7 @@ impl<'a, T> IntoIterator for &'a Endpoint<T> {
 /// assert_eq!(iter.next(), Some(&Level::Simple("id")));
 /// assert_eq!(iter.next(), None);
 /// ```
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone, Copy, Hash)]
+#[derive(Debug, Eq, PartialOrd, Ord, Clone, Copy)]
 pub enum Level<T> {
     /// Simple level without parameters
     Simple(T),
@@ -221,6 +177,30 @@ impl<T> Level<T> {
         match self {
             Level::Simple(level) => *level == other,
             Level::Parameter(_) => true,
+        }
+    }
+}
+
+impl<T> PartialEq for Level<T>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (Self::Simple(l0), Self::Simple(r0)) => l0 == r0,
+            (Self::Parameter(_), Self::Parameter(_)) => true,
+            _ => false,
+        }
+    }
+}
+
+impl<T: Hash> Hash for Level<T> {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        core::mem::discriminant(self).hash(state);
+
+        match self {
+            Level::Simple(level) => level.hash(state),
+            Level::Parameter(_) => {}
         }
     }
 }
@@ -571,36 +551,6 @@ mod tests {
     }
 
     #[test]
-    fn object_equality() {
-        let endpoint = Endpoint {
-            levels: vec![
-                Level::Parameter("sensor_id".to_string()),
-                Level::Simple("boolean_endpoint".to_string()),
-            ],
-        };
-
-        let path = MappingPath::try_from("/1/boolean_endpoint").unwrap();
-
-        assert!(!endpoint.is_object_path(&path));
-
-        let path = MappingPath::try_from("/1").unwrap();
-        assert!(endpoint.is_object_path(&path));
-    }
-
-    #[test]
-    fn object_field() {
-        let endpoint = Endpoint {
-            levels: vec![
-                Level::Parameter("sensor_id".to_string()),
-                Level::Simple("boolean_endpoint".to_string()),
-            ],
-        };
-
-        assert!(endpoint.eq_object_field("boolean_endpoint"));
-        assert!(!endpoint.eq_object_field("foo"));
-    }
-
-    #[test]
     fn level_eq_str() {
         let param = Level::Parameter("sensor_id".to_string());
 
@@ -611,5 +561,13 @@ mod tests {
 
         assert_eq!(simple, "boolean_endpoint");
         assert_ne!(simple, "foo");
+    }
+
+    #[test]
+    fn level_param_eq_ignore_param() {
+        let a = Level::Parameter("foo");
+        let b = Level::Parameter("bar");
+
+        assert_eq!(a, b);
     }
 }
