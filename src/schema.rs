@@ -100,7 +100,7 @@ where
     ///
     /// This has to be an unique, alphanumeric reverse internet domain
     /// name, shorter than 128 characters.
-    pub interface_name: T,
+    pub(crate) interface_name: T,
     /// The Major version qualifier for this interface.
     ///
     /// Interfaces with the same id and different `version_major` number are deemed incompatible. It
@@ -108,7 +108,7 @@ where
     /// version number.
     ///
     /// It must be a positive number.
-    pub version_major: i32,
+    pub(crate) version_major: i32,
     /// The Minor version qualifier for this interface.
     ///
     /// Interfaces with the same id and major version number and different `version_minor` number are
@@ -117,7 +117,7 @@ where
     /// incompatibilities and undefined behavior.
     ///
     /// It must be a positive number.
-    pub version_minor: i32,
+    pub(crate) version_minor: i32,
     /// Identifies the type of this Interface.
     ///
     /// Currently two types are supported: datastream and properties. Datastream should be used when
@@ -125,34 +125,119 @@ where
     /// there's no concept of state. Properties, instead, are meant to be an actual state and as
     /// such they have only a change history, and are retained.
     #[serde(rename = "type")]
-    pub interface_type: InterfaceType,
-    /// Identifies the quality of the interface.
+    pub(crate) interface_type: InterfaceType,
+    /// Identifies the direction of the interface.
     ///
     /// Interfaces are meant to be unidirectional, and this property defines who's sending or
     /// receiving data. device means the device/gateway is sending data to Astarte, consumer
     /// means the device/gateway is receiving data from Astarte. Bidirectional mode is not
     /// supported, you should instantiate another interface for that.
-    pub ownership: Ownership,
+    pub(crate) ownership: Ownership,
     /// Identifies the aggregation of the mappings of the interface.
     ///
     /// Individual means every mapping changes state or streams data independently, whereas an
     /// object aggregation treats the interface as an object, making all the mappings changes
     /// interdependent. Choosing the right aggregation might drastically improve performances.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
-    pub aggregation: Option<Aggregation>,
+    pub(crate) aggregation: Option<Aggregation>,
     /// An optional description of the interface.
     #[serde(default, skip_serializing_if = "is_none_or_empty")]
-    pub description: Option<T>,
+    pub(crate) description: Option<T>,
     /// A string containing documentation that will be injected in the generated client code.
     #[serde(default, skip_serializing_if = "is_none_or_empty")]
-    pub doc: Option<T>,
+    pub(crate) doc: Option<T>,
     /// Mappings define the endpoint of the interface, where actual data is stored/streamed.
     ///
     /// They are defined as relative URLs (e.g. /my/path) and can be parametrized (e.g.:
     /// /%{myparam}/path). A valid interface must have no mappings clash, which means that every
     /// mapping must resolve to a unique path or collection of paths (including
     /// parametrization). Every mapping acquires type, quality and aggregation of the interface.
-    pub mappings: Vec<Mapping<T>>,
+    pub(crate) mappings: Vec<Mapping<T>>,
+}
+
+impl<T> InterfaceJson<T>
+where
+    T: AsRef<str>,
+{
+    /// The name of the interface.
+    ///
+    /// This has to be an unique, alphanumeric reverse internet domain
+    /// name, shorter than 128 characters.
+    pub fn interface_name(&self) -> &str {
+        self.interface_name.as_ref()
+    }
+
+    /// The Major version qualifier for this interface.
+    ///
+    /// Interfaces with the same id and different `version_major` number are deemed incompatible. It
+    /// is then acceptable to redefine any property of the interface when changing the major
+    /// version number.
+    ///
+    /// It must be a positive number.
+    pub fn version_major(&self) -> i32 {
+        self.version_major
+    }
+
+    /// The Minor version qualifier for this interface.
+    ///
+    /// Interfaces with the same id and major version number and different `version_minor` number are
+    /// deemed compatible between each other. When changing the minor number, it is then only
+    /// possible to insert further mappings. Any other modification might lead to
+    /// incompatibilities and undefined behavior.
+    ///
+    /// It must be a positive number.
+    pub fn version_minor(&self) -> i32 {
+        self.version_minor
+    }
+
+    /// Identifies the type of this Interface.
+    ///
+    /// Currently two types are supported: datastream and properties. Datastream should be used when
+    /// dealing with streams of non-persistent data, where a single path receives updates and
+    /// there's no concept of state. Properties, instead, are meant to be an actual state and as
+    /// such they have only a change history, and are retained.
+    pub fn interface_type(&self) -> InterfaceType {
+        self.interface_type
+    }
+
+    /// Identifies the direction of the interface.
+    ///
+    /// Interfaces are meant to be unidirectional, and this property defines who's sending or
+    /// receiving data. device means the device/gateway is sending data to Astarte, consumer
+    /// means the device/gateway is receiving data from Astarte. Bidirectional mode is not
+    /// supported, you should instantiate another interface for that.
+    pub fn ownership(&self) -> Ownership {
+        self.ownership
+    }
+
+    /// Identifies the aggregation of the mappings of the interface.
+    ///
+    /// Individual means every mapping changes state or streams data independently, whereas an
+    /// object aggregation treats the interface as an object, making all the mappings changes
+    /// interdependent. Choosing the right aggregation might drastically improve performances.
+    pub fn aggregation(&self) -> Option<Aggregation> {
+        self.aggregation
+    }
+
+    /// An optional description of the interface.
+    pub fn description(&self) -> Option<&T> {
+        self.description.as_ref()
+    }
+
+    /// A string containing documentation that will be injected in the generated client code.
+    pub fn doc(&self) -> Option<&T> {
+        self.doc.as_ref()
+    }
+
+    /// Mappings define the endpoint of the interface, where actual data is stored/streamed.
+    ///
+    /// They are defined as relative URLs (e.g. /my/path) and can be parametrized (e.g.:
+    /// /%{myparam}/path). A valid interface must have no mappings clash, which means that every
+    /// mapping must resolve to a unique path or collection of paths (including
+    /// parametrization). Every mapping acquires type, quality and aggregation of the interface.
+    pub fn mappings(&self) -> &[Mapping<T>] {
+        &self.mappings
+    }
 }
 
 /// Mapping of an Interface.
@@ -179,12 +264,12 @@ where
     /// Path of the mapping.
     ///
     /// It can be parametrized (e.g. `/foo/%{path}/baz`).
-    pub endpoint: T,
+    pub(crate) endpoint: T,
     /// Defines the type of the mapping.
     ///
     /// This represent the data that will be published on the mapping.
     #[serde(rename = "type")]
-    pub mapping_type: MappingType,
+    pub(crate) mapping_type: MappingType,
     /// Defines when to consider the data delivered.
     ///
     /// Useful only with datastream. Defines whether the sent data should be considered delivered
@@ -193,13 +278,13 @@ where
     /// exactly once (unique). Unreliable by default. When using reliable data, consider you might
     /// incur in additional resource usage on both the transport and the device's end.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
-    pub reliability: Option<Reliability>,
+    pub(crate) reliability: Option<Reliability>,
     /// Allow to set a custom timestamp.
     ///
     /// Otherwise a timestamp is added when the message is received. If true explicit timestamp will
     /// also be used for sorting. This feature is only supported on datastreams.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
-    pub explicit_timestamp: Option<bool>,
+    pub(crate) explicit_timestamp: Option<bool>,
     /// Retention of the data when not deliverable.
     ///
     /// Useful only with datastream. Defines whether the sent data should be discarded if the
@@ -207,48 +292,140 @@ where
     /// memory (volatile) or on disk (stored), and guaranteed to be delivered in the timeframe
     /// defined by the expiry.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
-    pub retention: Option<Retention>,
+    pub(crate) retention: Option<Retention>,
     /// Expiry for the retain data.
     ///
     /// Useful when retention is stored. Defines after how many seconds a specific data entry should
     /// be kept before giving up and erasing it from the persistent cache. A value <= 0 means the
     /// persistent cache never expires, and is the default.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
-    pub expiry: Option<i64>,
+    pub(crate) expiry: Option<i64>,
     /// Retention policy for the database.
     ///
     /// Useful only with datastream. Defines whether data should expire from the database after a
     /// given interval. Valid values are: `no_ttl` and `use_ttl`.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
-    pub database_retention_policy: Option<DatabaseRetentionPolicy>,
+    pub(crate) database_retention_policy: Option<DatabaseRetentionPolicy>,
     /// Seconds to keep the data in the database.
     ///
     /// Useful when `database_retention_policy` is "`use_ttl`". Defines how many seconds a specific data
     /// entry should be kept before erasing it from the database.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
-    pub database_retention_ttl: Option<i64>,
+    pub(crate) database_retention_ttl: Option<i64>,
     /// Allows the property to be unset.
     ///
     /// Used only with properties.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
-    pub allow_unset: Option<bool>,
+    pub(crate) allow_unset: Option<bool>,
     /// Marks the mapping as required.
     ///
     /// Used only with object datastream.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
-    pub required: Option<bool>,
+    pub(crate) required: Option<bool>,
     /// An optional description of the mapping.
     #[serde(default, skip_serializing_if = "is_none_or_empty")]
-    pub description: Option<T>,
+    pub(crate) description: Option<T>,
     /// A string containing documentation that will be injected in the generated client code.
     #[serde(default, skip_serializing_if = "is_none_or_empty")]
-    pub doc: Option<T>,
+    pub(crate) doc: Option<T>,
 }
 
 impl<T> Mapping<T>
 where
     T: AsRef<str>,
 {
+    /// Path of the mapping.
+    ///
+    /// It can be parametrized (e.g. `/foo/%{path}/baz`).
+    pub fn endpoint(&self) -> &str {
+        self.endpoint.as_ref()
+    }
+
+    /// Defines the type of the mapping.
+    ///
+    /// This represent the data that will be published on the mapping.
+    pub fn mapping_type(&self) -> MappingType {
+        self.mapping_type
+    }
+
+    /// Defines when to consider the data delivered.
+    ///
+    /// Useful only with datastream. Defines whether the sent data should be considered delivered
+    /// when the transport successfully sends the data (unreliable), when we know that the data has
+    /// been received at least once (guaranteed) or when we know that the data has been received
+    /// exactly once (unique). Unreliable by default. When using reliable data, consider you might
+    /// incur in additional resource usage on both the transport and the device's end.
+    pub fn reliability(&self) -> Option<Reliability> {
+        self.reliability
+    }
+
+    /// Allow to set a custom timestamp.
+    ///
+    /// Otherwise a timestamp is added when the message is received. If true explicit timestamp will
+    /// also be used for sorting. This feature is only supported on datastreams.
+    pub fn explicit_timestamp(&self) -> Option<bool> {
+        self.explicit_timestamp
+    }
+
+    /// Retention of the data when not deliverable.
+    ///
+    /// Useful only with datastream. Defines whether the sent data should be discarded if the
+    /// transport is temporarily uncapable of delivering it (discard) or should be kept in a cache in
+    /// memory (volatile) or on disk (stored), and guaranteed to be delivered in the timeframe
+    /// defined by the expiry.
+    pub fn retention(&self) -> Option<Retention> {
+        self.retention
+    }
+
+    /// Expiry for the retain data.
+    ///
+    /// Useful when retention is stored. Defines after how many seconds a specific data entry should
+    /// be kept before giving up and erasing it from the persistent cache. A value <= 0 means the
+    /// persistent cache never expires, and is the default.
+    pub fn expiry(&self) -> Option<i64> {
+        self.expiry
+    }
+
+    /// Retention policy for the database.
+    ///
+    /// Useful only with datastream. Defines whether data should expire from the database after a
+    /// given interval. Valid values are: `no_ttl` and `use_ttl`.
+    pub fn database_retention_policy(&self) -> Option<DatabaseRetentionPolicy> {
+        self.database_retention_policy
+    }
+
+    /// Seconds to keep the data in the database.
+    ///
+    /// Useful when `database_retention_policy` is "`use_ttl`". Defines how many seconds a specific data
+    /// entry should be kept before erasing it from the database.
+    pub fn database_retention_ttl(&self) -> Option<i64> {
+        self.database_retention_ttl
+    }
+
+    /// Allows the property to be unset.
+    ///
+    /// Used only with properties.
+    pub fn allow_unset(&self) -> Option<bool> {
+        self.allow_unset
+    }
+
+    /// Marks the mapping as required.
+    ///
+    /// Used only with object datastream.
+    pub fn required(&self) -> Option<bool> {
+        self.required
+    }
+
+    /// An optional description of the mapping.
+    pub fn description(&self) -> Option<&T> {
+        self.description.as_ref()
+    }
+
+    /// A string containing documentation that will be injected in the generated client code.
+    pub fn doc(&self) -> Option<&T> {
+        self.doc.as_ref()
+    }
+
     /// Expiry of the data stream.
     ///
     /// If it's [`None`] the stream will never expire.
