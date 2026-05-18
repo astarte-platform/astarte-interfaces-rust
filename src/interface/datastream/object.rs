@@ -125,7 +125,7 @@ impl DatastreamObject {
             unreachable!("objects must have at least one mapping")
         };
 
-        mapping.endpoint().is_object_path(path)
+        mapping.is_object_path(path)
     }
 
     /// Get a mapping for in the object for the given field.
@@ -135,7 +135,7 @@ impl DatastreamObject {
     pub fn mapping(&self, path: &str) -> Option<&DatastreamObjectMapping> {
         self.mappings
             .iter()
-            .find(|mapping| mapping.endpoint.eq_object_field(path))
+            .find(|mapping| mapping.eq_object_field(path))
     }
 }
 
@@ -286,7 +286,7 @@ where
         let first = mappings.first().ok_or(MappingError::Empty)?;
 
         mappings.iter().skip(1).try_for_each(|other| {
-            if !first.endpoint().is_same_object(other.endpoint()) {
+            if !first.is_same_object(other) {
                 return Err(Error::Object(ObjectError::Endpoint {
                     endpoint: other.endpoint().to_string(),
                 }));
