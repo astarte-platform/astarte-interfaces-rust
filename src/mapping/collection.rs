@@ -20,10 +20,14 @@
 
 use std::{fmt::Debug, slice::Iter as SliceIter};
 
-use crate::{interface::MAX_INTERFACE_MAPPINGS, Endpoint};
+use crate::interface::MAX_INTERFACE_MAPPINGS;
 
 use super::{path::MappingPath, InterfaceMapping, MappingError};
 
+/// Collections of mapping
+///
+/// The mappings are sorted by the endpoint. This is used since object aggregates needs to iterate
+/// over the mappings, checking also for missing keys
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub(crate) struct MappingVec<T>
 where
@@ -76,7 +80,7 @@ where
 {
     type Error = MappingError;
 
-    fn try_from(value: Vec<T>) -> Result<Self, Self::Error> {
+    fn try_from(mut value: Vec<T>) -> Result<Self, Self::Error> {
         if value.is_empty() {
             return Err(MappingError::Empty);
         }
@@ -85,18 +89,19 @@ where
             return Err(MappingError::TooMany(value.len()));
         }
 
-        let mut endpoints: Vec<&Endpoint> = value.iter().map(T::endpoint).collect();
+        // No repetition so unstable is fine
         // Sort + check is O(n*log(n)) instead of O(n^2) for checking all items
-        endpoints.sort_unstable();
-        endpoints.windows(2).try_for_each(|window| {
+        value.sort_unstable_by(|a, b| a.endpoint().cmp(b.endpoint()));
+
+        value.windows(2).try_for_each(|window| {
             let [a, b] = window else {
                 // this never happen, for value.len < 2 the all is never called, see `windows`
                 unreachable!("windows returned less than 2 elements");
             };
 
-            if a == b {
+            if a.endpoint() == b.endpoint() {
                 return Err(MappingError::Duplicated {
-                    endpoint: a.to_string(),
+                    endpoint: a.endpoint().to_string(),
                 });
             }
 
@@ -161,5 +166,18 @@ mod tests {
         let endpoints = make_vecs(&cases);
 
         MappingVec::try_from(endpoints).unwrap();
+    }
+
+    #[test]
+    fn is_sorted() {
+        let cases = ["/foo/a32", "/foo/bar", "/%{param}/param"];
+
+        let endpoints = make_vecs(&cases);
+
+        let mappings = MappingVec::try_from(endpoints.clone()).unwrap();
+
+        assert!(mappings
+            .items
+            .is_sorted_by(|a, b| a.endpoint() < b.endpoint()));
     }
 }
