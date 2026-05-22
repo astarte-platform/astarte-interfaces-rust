@@ -1,6 +1,6 @@
 # This file is part of Astarte.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,23 +18,13 @@
 
 [package]
 name = "astarte-interfaces"
-version = "0.2.0"
+version = "1.0.0"
 edition = "2021"
-homepage = "https://astarte.cloud/"
-license = "Apache-2.0"
-repository = "https://github.com/astarte-platform/astarte-interfaces-rust"
 rust-version = "1.78"
 description = "Interfaces used by Astarte to define how data is exchange with a Device."
-
-[features]
-# Keeps the order of the mappings
-preserve_order = ["serde_json/preserve_order"]
-# Add description and doc fields to the interfaces
-doc-fields = []
-# Add the fields  only used by the server to the interfaces.
-server-fields = []
-# All interface fields are checked and must be valid
-strict = []
+homepage = "https://astarte.cloud/"
+repository = "https://github.com/astarte-platform/astarte-interfaces-rust"
+license = "Apache-2.0"
 
 [dependencies]
 cfg-if = "1.0.0"
@@ -47,3 +37,13 @@ tracing = "0.1.37"
 [dev-dependencies]
 pretty_assertions = "1.4.1"
 tracing-subscriber = "0.3.0"
+
+[features]
+# Add description and doc fields to the interfaces
+doc-fields = []
+# Keeps the order of the mappings
+preserve_order = ["serde_json/preserve_order"]
+# Add the fields  only used by the server to the interfaces.
+server-fields = []
+# All interface fields are checked and must be valid
+strict = []
