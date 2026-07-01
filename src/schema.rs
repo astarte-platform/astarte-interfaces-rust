@@ -322,6 +322,12 @@ where
     /// Used only with object datastream.
     #[serde(default, skip_serializing_if = "is_none_or_default")]
     pub(crate) required: Option<bool>,
+    /// Marks the mapping as encrypted.
+    ///
+    /// An encrypted endpoint enables end to end encryption on the exchanged data between Astarte
+    /// and the device.
+    #[serde(default, skip_serializing_if = "is_none_or_default")]
+    pub(crate) encrypted: Option<bool>,
     /// An optional description of the mapping.
     #[serde(default, skip_serializing_if = "is_none_or_empty")]
     pub(crate) description: Option<T>,
@@ -920,6 +926,7 @@ mod tests {
             required: None,
             description: None,
             doc: None,
+            encrypted: None,
         };
 
         cfg_if! {
@@ -967,6 +974,7 @@ mod tests {
             required: None,
             description: None,
             doc: None,
+            encrypted: None,
         };
 
         cfg_if! {
@@ -1055,5 +1063,28 @@ mod tests {
     fn database_retention_policy_functions() {
         assert_eq!(DatabaseRetentionPolicy::NoTtl.to_string(), "no_ttl");
         assert_eq!(DatabaseRetentionPolicy::UseTtl.to_string(), "use_ttl");
+    }
+
+    #[test]
+    fn parse_encrypted_mapping() {
+        let interface = serde_json::from_str::<InterfaceJson<String>>(
+            r#"{
+            "interface_name": "org.astarte-platform.genericproperties.Values",
+            "version_major": 1,
+            "version_minor": 0,
+            "type": "properties",
+            "ownership": "server",
+            "mappings": [{
+                "endpoint": "/double_endpoint",
+                "encrypted": true,
+                "type": "double"
+            }]
+        }"#,
+        )
+        .unwrap();
+
+        let mapping = interface.mappings.first().unwrap();
+
+        assert_eq!(mapping.encrypted, Some(true));
     }
 }

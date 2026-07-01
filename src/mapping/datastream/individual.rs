@@ -39,6 +39,7 @@ pub struct DatastreamIndividualMapping {
     pub(crate) reliability: Reliability,
     pub(crate) retention: Retention,
     pub(crate) explicit_timestamp: bool,
+    pub(crate) encrypted: bool,
     #[cfg(feature = "server-fields")]
     pub(crate) database_retention: crate::interface::DatabaseRetention,
     #[cfg(feature = "doc-fields")]
@@ -60,6 +61,12 @@ impl DatastreamIndividualMapping {
     #[must_use]
     pub fn retention(&self) -> Retention {
         self.retention
+    }
+
+    /// Returns if the datastream is encrypted.
+    #[must_use]
+    pub fn encrypted(&self) -> bool {
+        self.encrypted
     }
 
     /// Returns the [`DatabaseRetention`](crate::interface::DatabaseRetention) of the mapping.
@@ -127,6 +134,7 @@ where
             retention,
             explicit_timestamp: value.explicit_timestamp.unwrap_or_default(),
             mapping_type: value.mapping_type,
+            encrypted: value.encrypted.unwrap_or_default(),
             #[cfg(feature = "server-fields")]
             database_retention,
             #[cfg(feature = "doc-fields")]
@@ -168,6 +176,7 @@ impl<'a> From<&'a DatastreamIndividualMapping> for Mapping<Cow<'a, str>> {
             expiry: value.retention.as_expiry_seconds(),
             allow_unset: None,
             required: None,
+            encrypted: Some(value.encrypted),
             database_retention_policy,
             database_retention_ttl,
             description,
@@ -203,6 +212,7 @@ mod tests {
             database_retention_ttl: Some(database_ttl.as_secs().try_into().unwrap()),
             allow_unset: None,
             required: None,
+            encrypted: Some(true),
             description,
             doc,
         };
@@ -214,6 +224,7 @@ mod tests {
         assert_eq!(individual_mapping.mapping_type(), mapping_type);
         assert_eq!(individual_mapping.reliability(), reliability);
         assert!(individual_mapping.explicit_timestamp());
+        assert!(individual_mapping.encrypted());
         let exp_retention = Retention::Stored {
             expiry: Some(retention_expiry),
         };
@@ -244,6 +255,7 @@ mod tests {
             database_retention_ttl: None,
             allow_unset: Some(true),
             required: None,
+            encrypted: None,
             description: None,
             doc: None,
         };
@@ -268,6 +280,7 @@ mod tests {
             database_retention_ttl: None,
             allow_unset: None,
             required: Some(true),
+            encrypted: None,
             description: None,
             doc: None,
         };
