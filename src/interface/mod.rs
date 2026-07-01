@@ -639,6 +639,7 @@ pub(crate) mod tests {
                     "endpoint": "/%{sensor_id}/otherValue",
                     "type": "longinteger",
                     "explicit_timestamp": true,
+                    "encrypted": true,
                     "description": "Mapping description",
                     "doc": "Mapping doc"
                 },
@@ -646,6 +647,7 @@ pub(crate) mod tests {
                     "endpoint": "/%{sensor_id}/value",
                     "type": "double",
                     "explicit_timestamp": true,
+                    "encrypted": true,
                     "description": "Mapping description",
                     "doc": "Mapping doc"
                 }
@@ -663,11 +665,13 @@ pub(crate) mod tests {
                 {
                     "endpoint": "/%{sensor_id}/otherValue",
                     "type": "longinteger",
+                    "encrypted": true,
                     "explicit_timestamp": true
                 },
                 {
                     "endpoint": "/%{sensor_id}/value",
                     "type": "double",
+                    "encrypted": true,
                     "explicit_timestamp": true
                 }
             ]
@@ -706,6 +710,7 @@ pub(crate) mod tests {
             #[cfg(feature = "server-fields")]
             database_retention: DatabaseRetention::default(),
             explicit_timestamp: true,
+            encrypted: true,
             #[cfg(feature = "doc-fields")]
             description: Some("Mapping description".to_string()),
             #[cfg(feature = "doc-fields")]
@@ -720,6 +725,7 @@ pub(crate) mod tests {
             #[cfg(feature = "server-fields")]
             database_retention: DatabaseRetention::default(),
             explicit_timestamp: true,
+            encrypted: true,
             #[cfg(feature = "doc-fields")]
             description: Some("Mapping description".to_string()),
             #[cfg(feature = "doc-fields")]
@@ -824,6 +830,7 @@ pub(crate) mod tests {
             #[cfg(feature = "server-fields")]
             database_retention: DatabaseRetention::default(),
             explicit_timestamp: true,
+            encrypted: true,
         };
 
         let other_value_mapping = DatastreamIndividualMapping {
@@ -838,6 +845,7 @@ pub(crate) mod tests {
             #[cfg(feature = "server-fields")]
             database_retention: DatabaseRetention::default(),
             explicit_timestamp: true,
+            encrypted: true,
         };
 
         let interface = Interface::from_str(INTERFACE_JSON).unwrap();
