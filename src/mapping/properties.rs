@@ -31,6 +31,7 @@ pub struct PropertiesMapping {
     pub(crate) endpoint: Endpoint<String>,
     pub(crate) mapping_type: MappingType,
     pub(crate) allow_unset: bool,
+    pub(crate) encrypted: bool,
     #[cfg(feature = "doc-fields")]
     pub(crate) description: Option<String>,
     #[cfg(feature = "doc-fields")]
@@ -108,6 +109,7 @@ where
             endpoint,
             mapping_type: value.mapping_type,
             allow_unset: value.allow_unset.unwrap_or_default(),
+            encrypted: value.encrypted.unwrap_or_default(),
             #[cfg(feature = "doc-fields")]
             description: value.description.map(T::into),
             #[cfg(feature = "doc-fields")]
@@ -129,6 +131,7 @@ impl<'a> From<&'a PropertiesMapping> for Mapping<Cow<'a, str>> {
             database_retention_ttl: None,
             allow_unset: Some(value.allow_unset),
             required: None,
+            encrypted: Some(value.encrypted),
             #[cfg(feature = "doc-fields")]
             description: value.description().map(Cow::Borrowed),
             #[cfg(feature = "doc-fields")]
@@ -161,6 +164,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: Some(true),
+            encrypted: Some(true),
             required: None,
             description,
             doc,
@@ -192,6 +196,7 @@ mod tests {
             database_retention_policy: None,
             database_retention_ttl: None,
             allow_unset: Some(true),
+            encrypted: Some(true),
             required: None,
             description,
             doc,
@@ -203,6 +208,7 @@ mod tests {
             endpoint: Endpoint::try_from("/property/path").unwrap(),
             mapping_type: MappingType::Boolean,
             allow_unset: true,
+            encrypted: true,
             #[cfg(feature = "doc-fields")]
             description: mapping.description.as_ref().map(|v| v.to_string()),
             #[cfg(feature = "doc-fields")]
@@ -239,6 +245,7 @@ mod tests {
             database_retention_ttl: None,
             allow_unset: None,
             required: None,
+            encrypted: None,
             description: None,
             doc: None,
         };
@@ -263,6 +270,7 @@ mod tests {
             database_retention_ttl: None,
             allow_unset: None,
             required: None,
+            encrypted: None,
             description: None,
             doc: None,
         };
@@ -287,6 +295,7 @@ mod tests {
             database_retention_ttl: None,
             allow_unset: None,
             required: None,
+            encrypted: None,
             description: None,
             doc: None,
         };
@@ -311,6 +320,7 @@ mod tests {
             database_retention_ttl: None,
             allow_unset: None,
             required: None,
+            encrypted: None,
             description: None,
             doc: None,
         };
@@ -335,6 +345,7 @@ mod tests {
             database_retention_ttl: None,
             allow_unset: None,
             required: None,
+            encrypted: None,
             description: None,
             doc: None,
         };
@@ -359,6 +370,7 @@ mod tests {
             database_retention_ttl: Some(420),
             allow_unset: None,
             required: None,
+            encrypted: None,
             description: None,
             doc: None,
         };
@@ -383,6 +395,7 @@ mod tests {
             database_retention_ttl: None,
             allow_unset: None,
             required: Some(true),
+            encrypted: None,
             description: None,
             doc: None,
         };

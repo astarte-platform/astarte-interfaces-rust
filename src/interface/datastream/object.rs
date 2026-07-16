@@ -78,6 +78,7 @@ pub struct DatastreamObject {
     reliability: Reliability,
     explicit_timestamp: bool,
     retention: Retention,
+    encrypted: bool,
     mappings: MappingVec<DatastreamObjectMapping>,
     #[cfg(feature = "server-fields")]
     #[cfg_attr(docsrs, doc(cfg(feature = "server-fields")))]
@@ -110,6 +111,13 @@ impl DatastreamObject {
     pub fn retention(&self) -> Retention {
         self.retention
     }
+
+    /// Returns if the object is encrypted.
+    #[must_use]
+    pub fn encrypted(&self) -> bool {
+        self.encrypted
+    }
+
     /// Returns the database retention for the object.
     #[cfg(feature = "server-fields")]
     #[cfg_attr(docsrs, doc(cfg(feature = "server-fields")))]
@@ -224,7 +232,8 @@ impl Schema for DatastreamObject {
                 retention: Some(self.retention.into()),
                 expiry: self.retention.as_expiry_seconds(),
                 allow_unset: None,
-                required: None,
+                required: Some(mapping.required),
+                encrypted: Some(self.encrypted),
                 database_retention_policy,
                 database_retention_ttl,
                 description,
@@ -274,6 +283,7 @@ where
         let reliability = first.reliability.unwrap_or_default();
         let explicit_timestamp = first.explicit_timestamp.unwrap_or_default();
         let retention = first.retention_with_expiry()?;
+        let encrypted = first.encrypted.unwrap_or_default();
         #[cfg(feature = "server-fields")]
         let database_retention = first.database_retention_with_ttl()?;
 
@@ -305,6 +315,7 @@ where
             retention,
             #[cfg(feature = "server-fields")]
             database_retention,
+            encrypted,
             mappings,
             #[cfg(feature = "doc-fields")]
             description: value.description.map(T::into),
@@ -404,6 +415,7 @@ mod tests {
                     "database_retention_policy": "use_ttl",
                     "database_retention_ttl": 420,
                     "required": true,
+                    "encrypted": true,
                     "description": "The description of the\tmapping",
                     "doc": "The documentation of the\tmapping"
                 }]
@@ -430,6 +442,7 @@ mod tests {
             retention: Retention::Stored {
                 expiry: Some(Duration::from_secs(30)),
             },
+            encrypted: true,
             mappings: MappingVec::try_from(vec![exp_mapping.clone()]).unwrap(),
             #[cfg(feature = "server-fields")]
             database_retention: crate::interface::DatabaseRetention::UseTtl {
@@ -455,6 +468,7 @@ mod tests {
         assert_eq!(object.explicit_timestamp(), object.explicit_timestamp);
         assert_eq!(object.interface_type(), InterfaceType::Datastream);
         assert_eq!(object.aggregation(), Aggregation::Object);
+        assert!(object.encrypted());
         #[cfg(feature = "server-fields")]
         assert_eq!(object.database_retention(), object.database_retention);
         #[cfg(feature = "doc-fields")]
@@ -479,7 +493,8 @@ mod tests {
             retention: Some(object.retention.into()),
             expiry: object.retention.as_expiry_seconds(),
             allow_unset: None,
-            required: None,
+            required: Some(true),
+            encrypted: Some(true),
             #[cfg(feature = "doc-fields")]
             description: exp_mapping.description.as_ref().map(Cow::from),
             #[cfg(feature = "doc-fields")]

@@ -201,6 +201,7 @@ mod tests {
             database_retention_ttl: None,
             allow_unset: None,
             required: None,
+            encrypted: None,
             description,
             doc,
         };
@@ -230,6 +231,7 @@ mod tests {
             database_retention_ttl: None,
             allow_unset: None,
             required: None,
+            encrypted: None,
             description: None,
             doc: None,
         };
