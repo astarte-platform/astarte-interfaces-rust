@@ -51,7 +51,7 @@ jobs:
           submodules: true
       - uses: ./.github/actions/install-deps
       - uses: actions-rust-lang/setup-rust-toolchain@v1.17.0
-      - uses: mozilla-actions/sccache-action@v0.0.10
+      - uses: mozilla-actions/sccache-action@v0.0.11
       - name: cargo clippy
         run: cargo clippy --locked --all-targets --all-features --workspace
   doc:
@@ -64,7 +64,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1.17.0
         with:
           toolchain: nightly
-      - uses: mozilla-actions/sccache-action@v0.0.10
+      - uses: mozilla-actions/sccache-action@v0.0.11
       - uses: dtolnay/install@cargo-docs-rs
       - run: cargo +nightly docs-rs --locked -p "$MAIN_CRATE"
   features:
@@ -75,8 +75,8 @@ jobs:
           submodules: true
       - uses: ./.github/actions/install-deps
       - uses: actions-rust-lang/setup-rust-toolchain@v1.17.0
-      - uses: mozilla-actions/sccache-action@v0.0.10
-      - uses: taiki-e/install-action@v2.85.2
+      - uses: mozilla-actions/sccache-action@v0.0.11
+      - uses: taiki-e/install-action@v2.85.4
         with:
           tool: cargo-hack
       - name: cargo hack test
@@ -93,5 +93,5 @@ jobs:
           submodules: true
       - uses: ./.github/actions/install-deps
       - uses: actions-rust-lang/setup-rust-toolchain@v1.17.0
-      - uses: mozilla-actions/sccache-action@v0.0.10
+      - uses: mozilla-actions/sccache-action@v0.0.11
       - run: ./scripts/ci/check-for-publish.sh
