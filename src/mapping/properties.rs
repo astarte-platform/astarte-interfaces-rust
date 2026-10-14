@@ -44,6 +44,12 @@ impl PropertiesMapping {
     pub fn allow_unset(&self) -> bool {
         self.allow_unset
     }
+
+    /// Returns if the property is encrypted.
+    #[must_use]
+    pub fn encrypted(&self) -> bool {
+        self.encrypted
+    }
 }
 
 impl InterfaceMapping for PropertiesMapping {
