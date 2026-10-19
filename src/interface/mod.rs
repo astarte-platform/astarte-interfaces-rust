@@ -6,7 +6,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -608,10 +608,10 @@ pub(crate) mod tests {
 
     use super::*;
     use crate::{
-        mapping::{InterfaceMapping, MappingError},
-        schema::{InterfaceType, MappingType, Ownership, Reliability},
         DatastreamIndividual, DatastreamIndividualMapping, Endpoint, Interface, MappingPath,
         Schema,
+        mapping::{InterfaceMapping, MappingError},
+        schema::{InterfaceType, MappingType, Ownership, Reliability},
     };
 
     const E2E_DEVICE_PROPERTY: &str =

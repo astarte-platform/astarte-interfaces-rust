@@ -8,7 +8,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,15 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-set -exEuo pipefail
+set -eEuo pipefail
+
+# Trap -e errors
+trap 'echo "Exit status $? at line $LINENO from: $BASH_COMMAND"' ERR
+
+# Let's you enable debug mode in the github action
+if [[ -n ${RUNNER_DEBUG:-} ]]; then
+    set -x
+fi
 
 ####
 # ENV
@@ -36,6 +44,7 @@ set -exEuo pipefail
 # You'll find the coverage report and `lcov` file under: $CARGO_TARGET_DIR/debug/coverage/
 #
 # Use absolute paths every where
+export RUSTUP_TOOLCHAIN="nightly"
 CARGO_TARGET_DIR=$(
     cargo metadata --format-version 1 --no-deps --locked |
         jq '.target_directory' --raw-output
@@ -66,7 +75,12 @@ gethtml_wrapper() {
 
 crate="astarte-interfaces"
 
+# Clean up old coverage artifacts
+rm -rf "$CARGO_TARGET_DIR/lcov" || true
+cargo llvm-cov clean || true
+
 if [[ -n "${EXPORT_FOR_CI:-}" ]]; then
+    rm "$PWD/coverage-$crate.info" || true
     out_path="$PWD/coverage-$crate.info"
 else
     mkdir -p "$CARGO_TARGET_DIR/lcov"
@@ -74,7 +88,7 @@ else
 fi
 
 # Currently branch coverage can be broken on nightly
-cargo +nightly llvm-cov \
+cargo llvm-cov \
     --all-features -p "$crate" \
     --lcov \
     --output-path "$out_path"

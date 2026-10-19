@@ -1,12 +1,12 @@
 // This file is part of Astarte.
 //
-// Copyright 2023 - 2025 SECO Mind Srl
+// Copyright 2023-2026 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -74,7 +74,9 @@ pub enum Error {
     #[error("incompatible interface version")]
     VersionChange(#[from] VersionChangeError),
     /// Invalid interface type
-    #[error("couldn't convert interface, expected {exp_type} {exp_aggregation} but got {got_type} {got_aggregation}")]
+    #[error(
+        "couldn't convert interface, expected {exp_type} {exp_aggregation} but got {got_type} {got_aggregation}"
+    )]
     InterfaceConversion {
         /// The interface type we expected.
         exp_type: InterfaceType,

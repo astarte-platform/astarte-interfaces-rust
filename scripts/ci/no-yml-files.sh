@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # This file is part of Astarte.
 #
 # Copyright 2026 SECO Mind Srl
@@ -6,7 +8,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,15 +18,20 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-[project]
-name = "astarte-interfaces"
-version = "0.1.0"
-description = "Python dependencies for scripts and tools"
-readme = "README.md"
-requires-python = ">=3.14"
-dependencies = []
+set -eEuo pipefail
 
-[dependency-groups]
-dev = [
-  "reuse>=6.2.0",
-]
+# Trap -e errors
+trap 'echo "Exit status $? at line $LINENO from: $BASH_COMMAND"' ERR
+
+# Let's you enable debug mode in the github action
+if [[ -n ${RUNNER_DEBUG:-} ]]; then
+    set -x
+fi
+
+files=$(find . -name '*.yml')
+
+if [[ -n $files ]]; then
+    echo "Yaml files should have a .yaml extension"
+    echo "$files"
+    exit 1
+fi
