@@ -28,7 +28,7 @@ set: [errexit, nounset, pipefail]
 
 vars:
   MAIN_CRATE: "astarte-interfaces"
-  MSRV: 1.78
+  MSRV: 1.88
 
 env:
   IS_CRATE:

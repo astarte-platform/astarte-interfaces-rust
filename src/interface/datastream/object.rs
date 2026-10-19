@@ -6,7 +6,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//    http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,10 +27,10 @@ use serde::Serialize;
 
 use crate::{
     error::Error,
-    interface::{name::InterfaceName, version::InterfaceVersion, MappingVec, Retention, Schema},
+    interface::{MappingVec, Retention, Schema, name::InterfaceName, version::InterfaceVersion},
     mapping::{
-        datastream::object::DatastreamObjectMapping, path::MappingPath, InterfaceMapping,
-        MappingError,
+        InterfaceMapping, MappingError, datastream::object::DatastreamObjectMapping,
+        path::MappingPath,
     },
     schema::{Aggregation, InterfaceJson, InterfaceType, Mapping, Ownership, Reliability},
 };
@@ -387,9 +387,9 @@ mod tests {
 
     use pretty_assertions::assert_eq;
 
+    use crate::Endpoint;
     use crate::interface::tests::E2E_DEVICE_AGGREGATE;
     use crate::schema::MappingType;
-    use crate::Endpoint;
 
     use super::*;
 
