@@ -8,7 +8,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,9 +18,24 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-set -exEuo pipefail
+set -eEuo pipefail
+
+# Trap -e errors
+trap 'echo "Exit status $? at line $LINENO from: $BASH_COMMAND"' ERR
+
+# Let's you enable debug mode in the github action
+if [[ -n ${RUNNER_DEBUG:-} ]]; then
+    set -x
+fi
 
 # Check if the crate can be compiled with only the files that will be packaged when publishing
+
+target_dir=$(cargo metadata --no-deps --format-version 1 | jq '.target_directory' --raw-output)
+
+workingDir="$target_dir/check-publish"
+
+rm -rf "$workingDir" || true
+mkdir -p "$workingDir"
 
 # List files in a package
 listPackage() {
@@ -28,18 +43,21 @@ listPackage() {
 }
 
 pkgsFiles=$(
-    cargo package --allow-dirty -l -p "astarte-interfaces" | sort
+    cargo package --allow-dirty -l -p "astarte-interfaces" |
+        sort -i |
+        uniq
 )
 localFiles=$(
-    git ls-files -cdmo | sort -u
+    git ls-files --recurse-submodules --cached --no-deleted | sort -i | uniq
 )
 
 # List files unique to localFiles and not present in pkgsFiles
 toCopy=$(comm -12 <(echo "$localFiles") <(echo "$pkgsFiles"))
 
-workingDir="$(mktemp -d)"
-
-mkdir -p "$workingDir"
+if [[ -z $toCopy ]]; then
+    echo Nothing to check
+    exit
+fi
 
 cp -v Cargo.toml Cargo.lock "$workingDir"
 
@@ -51,3 +69,6 @@ echo "$toCopy" | while read -r file; do
 done
 
 cargo publish --dry-run --manifest-path "$workingDir/Cargo.toml" --workspace --all-features --locked
+
+# So it doesn't get cached in CI
+rm -rf "$workingDir"
