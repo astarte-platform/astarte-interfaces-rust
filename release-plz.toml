@@ -106,8 +106,3 @@ commit_parsers = [
   { message = ".*forward port", group = "other" },
   { message = "^.*", skip = true },
 ]
-
-postprocessors = [
-  # Format the rendered changelog using `dprint`
-  { pattern = ".*", replace = "prettier --stdin-filepath CHANGELOG.md" }
-]
