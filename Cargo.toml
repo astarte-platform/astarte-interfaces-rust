@@ -18,7 +18,7 @@
 
 [package]
 name = "astarte-interfaces"
-version = "1.1.0"
+version = "1.1.1"
 edition = "2024"
 rust-version = "1.88"
 description = "Interfaces used by Astarte to define how data is exchange with a Device."
